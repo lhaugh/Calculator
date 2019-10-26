@@ -1,0 +1,55 @@
+# Derived From:
+# http://kleber-swf.com/the-definitive-gitignore-for-unity-projects/
+
+# ============= #
+# Working Files #
+# ============= #
+/[Bb]uild/
+/[Bb]uilds/
+node_modules/
+npm-debug.log
+/yarn.lock
+/StyleCop.Cache
+
+# =============== #
+# Unity Generated #
+# =============== #
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/*.sln
+/*.csproj
+/*.unityproj
+/*.booproj
+/sysinfo.txt
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+/.vs/
+bin
+obj
+ExportedObj/
+*.svd
+*.userprefs
+*.pidb
+*.suo
+*.user
+*.pdb
+*.pdb.meta
+
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store
+.DS_Store?
+*~
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+
+!Assets/**/Icons
