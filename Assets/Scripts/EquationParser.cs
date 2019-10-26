@@ -17,6 +17,8 @@ namespace Calculator
 
         private float Evaluate(List<EquationToken> tokens)
         {
+            UnityEngine.Debug.Log("Evaluate tokens from: " + tokens.Count);
+
             if (tokens.Count == 1) {
                 if (tokens[0].Type != EquationToken.TokenType.Value) {
                     throw new ArgumentException("Invalid equation.");
@@ -29,6 +31,7 @@ namespace Calculator
             int index = 0;
 
             for (int i = 0; i < tokens.Count; i++) {
+            UnityEngine.Debug.Log("tokens " + i + tokens[i].Type);
 
                 if (tokens[i].Type > highestOperator) {
                     highestOperator = tokens[i].Type;
@@ -36,7 +39,7 @@ namespace Calculator
                 }
             }
 
-            if (index == 0) {
+            if (index == 0 && tokens[0].Type != EquationToken.TokenType.OpenBracket) {
                 throw new ArgumentException("Invalid equation. Missing opperator.");
             }
 
@@ -95,70 +98,93 @@ namespace Calculator
         
         private float Read(string equation)
         {
-            var tokenStrings = equation.Split(' ');
+            var tokenStrings = new List<string>();
             var tokens = new List<EquationToken>();
+            int lastToken = 0;
 
-            foreach (string token in tokenStrings) {
+            for (int i = 0; i < equation.Length; i++) {
 
-                if (token == "(") {
+                if (equation[i] == '(') {
                     tokens.Add(new EquationToken() {
                         Type = EquationToken.TokenType.OpenBracket
                     });
+                    lastToken = i + 1;
                     continue;
                 }
 
-                if (token == ")") {
-                    tokens.Add(new EquationToken() {
-                        Type = EquationToken.TokenType.CloseBracket
-                    });
+                if (equation[i] == ')') {
+                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.CloseBracket, ref tokens);
+                    lastToken = i + 1;          
                     continue;
                 }
 
-                if (token == "*") {
-                    tokens.Add(new EquationToken() {
-                        Type = EquationToken.TokenType.Multiplication
-                    });
+                if (equation[i] == '*') {
+                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.Multiplication, ref tokens);
+                    lastToken = i + 1;
                     continue;
                 }
 
-                if (token == "/") {
-                    tokens.Add(new EquationToken() {
-                        Type = EquationToken.TokenType.Division
-                    });
+                if (equation[i] == '/') {
+                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.Division, ref tokens);
+                    lastToken = i + 1;                    
                     continue;
                 }
 
-                if (token == "+") {
-                    tokens.Add(new EquationToken() {
-                        Type = EquationToken.TokenType.Addition
-                    });
+                if (equation[i] == '+') {
+                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.Addition, ref tokens);
+                    lastToken = i + 1;          
                     continue;
                 }
 
-                if (token == "-") {
-                    tokens.Add(new EquationToken() {
-                        Type = EquationToken.TokenType.Subtraction
-                    });
+                if (equation[i] == '-') {
+                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.Subtraction, ref tokens);
+                    lastToken = i + 1;          
                     continue;
                 }
-
-                float baseValue;
-                if (float.TryParse(token, out baseValue)) {
-                    tokens.Add(new EquationToken(){
-                        Type = EquationToken.TokenType.Value,
-                        Value = baseValue
-                    });
-                    continue;
-                }
-
-                throw new ArgumentException("Invalid equation. Unexpected token: " + token);
             }
+
+            UnityEngine.Debug.Log("Last tokens from: " + lastToken + " " + equation.Length);
+
+            if (lastToken != equation.Length) {
+                tokens.Add(this.ParseToken(equation.Substring(lastToken, equation.Length - lastToken)));
+            }
+                    
 
             return this.Evaluate(tokens);
         }
 
+        private void CreateTokens(
+            ref string equation,
+            int lastToken,
+            int index,
+            EquationToken.TokenType currentToken,
+            ref List<EquationToken> tokens)
+        {
+            UnityEngine.Debug.Log("Create tokens from: " + equation.Substring(lastToken, index - lastToken));
 
-        public class EquationToken
+            if (index - lastToken != 0) {
+                tokens.Add(this.ParseToken(equation.Substring(lastToken, index - lastToken)));
+            }
+            tokens.Add(new EquationToken() {
+                Type = currentToken,
+            });
+        }
+
+        private EquationToken ParseToken(string token)
+        {
+            float baseValue;
+            if (float.TryParse(token, out baseValue)) {
+                return new EquationToken(){
+                    Type = EquationToken.TokenType.Value,
+                    Value = baseValue
+                };
+            }
+
+            throw new ArgumentException("Invalid equation. Unexpected token: " + token);
+        }
+
+
+        private sealed class EquationToken
         {
             public enum TokenType
             {

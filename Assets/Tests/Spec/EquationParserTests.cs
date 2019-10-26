@@ -31,16 +31,18 @@ namespace Calculator.Tests
 
         [TestCase("666", 666)]
         [TestCase("3.141", 3.141f)]
-        [TestCase("1 + 3", 4)]
+        [TestCase("1+3", 4)]
+        [TestCase("1+3+8", 12)]
+        [TestCase("1.5+3.4", 4.9f)]
+        [TestCase("8*8", 64)]
+        [TestCase("8*8+10", 74)]
+        [TestCase("24/8", 3)]
+        [TestCase("24-8", 16)]
+        [TestCase("7*(4+5)", 63)]
+        [TestCase("(4+10+2)/8", 2)]
+        [TestCase("7+(4+5)/9", 8)]
+        [TestCase("7*(4+(2*2))", 56)]
         [TestCase("1 + 3 + 8", 12)]
-        [TestCase("1.5 + 3.4", 4.9f)]
-        [TestCase("8 * 8", 64)]
-        [TestCase("8 * 8 + 10", 74)]
-        [TestCase("24 / 8", 3)]
-        [TestCase("24 - 8", 16)]
-        [TestCase("7 * ( 4 + 5 )", 63)]
-        [TestCase("7 + ( 4 + 5 ) / 9", 8)]
-        [TestCase("7 * ( 4 + ( 2 * 2 ) )", 56)]
         public void Parse_Returns_ExpectedValue(string equation, float answer)
         {
             var value = this.equationParser.Parse(equation);
