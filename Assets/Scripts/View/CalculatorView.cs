@@ -7,50 +7,47 @@ namespace Calculator.View
 {
     public class CalculatorView : MonoBehaviour, ICalculatorView
     {
-#pragma warning disable 0649
-
         [SerializeField]
-        private Button button0;
+        private Button button0 = null;
         [SerializeField]
-        private Button button1;
+        private Button button1 = null;
         [SerializeField]
-        private Button button2;
+        private Button button2 = null;
         [SerializeField]
-        private Button button3;
+        private Button button3 = null;
         [SerializeField]
-        private Button button4;
+        private Button button4 = null;
         [SerializeField]
-        private Button button5;
+        private Button button5 = null;
         [SerializeField]
-        private Button button6;
+        private Button button6 = null;
         [SerializeField]
-        private Button button7;
+        private Button button7 = null;
         [SerializeField]
-        private Button button8;
+        private Button button8 = null;
         [SerializeField]
-        private Button button9;
+        private Button button9 = null;
         [SerializeField]
-        private Button buttonDecimal;
+        private Button buttonDecimal = null;
         [SerializeField]
-        private Button buttonMultiply;
+        private Button buttonMultiply = null;
         [SerializeField]
-        private Button buttonDivide;
+        private Button buttonDivide = null;
         [SerializeField]
-        private Button buttonAdd;
+        private Button buttonAdd = null;
         [SerializeField]
-        private Button buttonSubtract;
+        private Button buttonSubtract = null;
         [SerializeField]
-        private Button buttonOpenBracket;
+        private Button buttonOpenBracket = null;
         [SerializeField]
-        private Button buttonCloseBracket;
+        private Button buttonCloseBracket = null;
         [SerializeField]
-        private Button buttonEquals;
+        private Button buttonEquals = null;
         [SerializeField]
-        private Button buttonClear;
+        private Button buttonClear = null;
         [SerializeField]
-        private TMP_InputField inputField;
+        private TMP_InputField inputField = null;
     
-#pragma warning restore 0649
 
         public string DisplayContents 
         { 
@@ -70,8 +67,7 @@ namespace Calculator.View
         public event Action CloseBracketPressed;
 
 
-        // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
             this.button0.onClick.AddListener(this.OnButton0Pressed);
             this.button1.onClick.AddListener(this.OnButton1Pressed);
@@ -93,6 +89,13 @@ namespace Calculator.View
             this.buttonCloseBracket.onClick.AddListener(this.OnButtonCloseBracketPressed);
             this.buttonEquals.onClick.AddListener(this.OnButtonEqualsPressed);
             this.buttonClear.onClick.AddListener(this.OnButtonClearPressed);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Return)) {
+                this.EqualsPressed?.Invoke();
+            }
         }
 
         private void OnButton0Pressed()

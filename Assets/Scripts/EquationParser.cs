@@ -1,116 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Calculator
 {
     public sealed class EquationParser : IEquationParser
     {
-        public float Parse(string equation)
-        {
-            if (equation == null) {
-                throw new ArgumentNullException(nameof(equation));
-            }
-
-            return this.Read(equation);
-        }
-
-
-        private float Evaluate(List<EquationToken> tokens)
-        {
-            UnityEngine.Debug.Log("Evaluate tokens from: " + tokens.Count);
-
-            if (tokens.Count == 1) {
-                if (tokens[0].Type != EquationToken.TokenType.Value) {
-                    throw new ArgumentException("Invalid equation.");
-                }
-
-                return tokens[0].Value;
-            }
-
-            var highestOperator = EquationToken.TokenType.Value;
-            int index = 0;
-
-            for (int i = 0; i < tokens.Count; i++) {
-            UnityEngine.Debug.Log("tokens " + i + tokens[i].Type);
-
-                if (tokens[i].Type > highestOperator) {
-                    highestOperator = tokens[i].Type;
-                    index = i;
-                }
-            }
-
-            if (index == 0 && tokens[0].Type != EquationToken.TokenType.OpenBracket) {
-                throw new ArgumentException("Invalid equation. Missing opperator.");
-            }
-
-            if (highestOperator == EquationToken.TokenType.OpenBracket) {
-                int bracketDepth = 0;
-
-                for (int i = index + 1; i < tokens.Count; i++) {
-                    if (tokens[i].Type == EquationToken.TokenType.OpenBracket) {
-                        bracketDepth++;
-                    }
-                    else if (tokens[i].Type == EquationToken.TokenType.CloseBracket) {
-                        bracketDepth--;
-                    }
-
-                    if (bracketDepth < 0) {
-                        int bracketLength = i - index;
-                        var bracketContents = tokens.GetRange(index + 1, bracketLength - 1);
-
-                        float bracketValue = this.Evaluate(bracketContents);
-
-                        var leftHandSideTokens = tokens.GetRange(0, index);
-                        var rightHandSideTokens = tokens.GetRange(i + 1, tokens.Count - i - 1);
-
-                        tokens.RemoveRange(index, bracketLength + 1);
-                        tokens.Insert(index, new EquationToken() {
-                            Type = EquationToken.TokenType.Value,
-                            Value = bracketValue,
-                        });
-
-                        return this.Evaluate(tokens);
-                    }
-                }
-            }
-
-            float leftHandSide = this.Evaluate(tokens.GetRange(0, index));
-            float rightHandSide = this.Evaluate(tokens.GetRange(index + 1, tokens.Count - index - 1));
-
-            switch (highestOperator)
-            {
-                case EquationToken.TokenType.Multiplication:
-                return leftHandSide * rightHandSide;
-
-                case EquationToken.TokenType.Division:
-                return leftHandSide / rightHandSide;
-
-                case EquationToken.TokenType.Addition:
-                return leftHandSide + rightHandSide;
-
-                case EquationToken.TokenType.Subtraction:
-                return leftHandSide - rightHandSide;
-
-                default:
-                throw new ArgumentException("Invalid equation.");
-            }
-        }
-        
-        private float Read(string equation)
+        public bool TryParse(string equation, out List<EquationToken> tokens)
         {
             var tokenStrings = new List<string>();
-            var tokens = new List<EquationToken>();
+            tokens = new List<EquationToken>();
             int lastToken = 0;
+            bool carryNegative = false;
 
             for (int i = 0; i < equation.Length; i++) {
 
                 if (equation[i] == '(') {
-                    tokens.Add(new EquationToken() {
-                        Type = EquationToken.TokenType.OpenBracket
-                    });
-                    lastToken = i + 1;
+
+                    // tokens.Add(new EquationToken() {
+                    //     Type = EquationToken.TokenType.OpenBracket
+                    // });
+                    // lastToken = i + 1;
+
+                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.OpenBracket, ref tokens, addNegative: carryNegative);
+                    lastToken = i + 1;     
+                    carryNegative = false;
                     continue;
                 }
+
+                carryNegative = false;
 
                 if (equation[i] == ')') {
                     this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.CloseBracket, ref tokens);
@@ -137,68 +53,95 @@ namespace Calculator
                 }
 
                 if (equation[i] == '-') {
-                    this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.Subtraction, ref tokens);
-                    lastToken = i + 1;          
+                    //Subtract can act both as an operator or to designate negative numbers
+                    if (i == 0 ||
+                        (tokens.Count > 0 &&
+                        tokens[tokens.Count - 1].Type != EquationToken.TokenType.CloseBracket &&
+                        tokens[tokens.Count - 1].Type != EquationToken.TokenType.Value)) {
+                            carryNegative = true;
+                    }
+                    else {
+                        this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.Subtraction, ref tokens);
+                        lastToken = i + 1;
+                    }
+
                     continue;
                 }
             }
 
-            UnityEngine.Debug.Log("Last tokens from: " + lastToken + " " + equation.Length);
-
             if (lastToken != equation.Length) {
-                tokens.Add(this.ParseToken(equation.Substring(lastToken, equation.Length - lastToken)));
+                EquationToken token;
+                if (!this.ParseToken(equation.Substring(lastToken, equation.Length - lastToken), out token)) {
+                    return false;
+                }
+
+                tokens.Add(token);
             }
-                    
 
-            return this.Evaluate(tokens);
+            return true;
         }
-
-        private void CreateTokens(
+        
+        private bool CreateTokens(
             ref string equation,
             int lastToken,
             int index,
             EquationToken.TokenType currentToken,
-            ref List<EquationToken> tokens)
+            ref List<EquationToken> tokens,
+            bool addNegative = false)
         {
-            UnityEngine.Debug.Log("Create tokens from: " + equation.Substring(lastToken, index - lastToken));
-
-            if (index - lastToken != 0) {
-                tokens.Add(this.ParseToken(equation.Substring(lastToken, index - lastToken)));
+            int previousTokenLength = index - lastToken;
+            if (addNegative) {
+                previousTokenLength -= 1;
             }
+            
+            bool didParse = false;
+            if (previousTokenLength != 0) {
+                EquationToken token;
+                if (this.ParseToken(equation.Substring(lastToken, previousTokenLength), out token)) {
+                    tokens.Add(token);
+                    didParse = true;
+                }
+                else if (!addNegative) {
+                    return false;
+                }
+            }
+
+            // This is to handle a situtaion like "5*-(2*2)"
+            if (addNegative) {
+                if (didParse) {
+                    tokens.Add (new EquationToken() {
+                        Type = EquationToken.TokenType.Addition,
+                    });
+                }
+                tokens.Add (new EquationToken() {
+                    Type = EquationToken.TokenType.Value,
+                    Value = -1,
+                });
+                tokens.Add (new EquationToken() {
+                    Type = EquationToken.TokenType.Multiplication,
+                });
+            }
+
             tokens.Add(new EquationToken() {
                 Type = currentToken,
             });
+
+            return true;
         }
 
-        private EquationToken ParseToken(string token)
+        private bool ParseToken(string tokenString, out EquationToken token)
         {
             float baseValue;
-            if (float.TryParse(token, out baseValue)) {
-                return new EquationToken(){
+            if (float.TryParse(tokenString, out baseValue)) {
+                token = new EquationToken(){
                     Type = EquationToken.TokenType.Value,
                     Value = baseValue
                 };
+                return true;
             }
 
-            throw new ArgumentException("Invalid equation. Unexpected token: " + token);
-        }
-
-
-        private sealed class EquationToken
-        {
-            public enum TokenType
-            {
-                Value = 0,
-                CloseBracket,
-                Multiplication,
-                Division,
-                Addition,
-                Subtraction,
-                OpenBracket,
-            }
-
-            public TokenType Type;
-            public float Value;
+            token = null;
+            return false;
         }
     }
 }

@@ -1,7 +1,9 @@
-﻿namespace Calculator
+﻿using System.Collections.Generic;
+
+namespace Calculator
 {
     public interface IEquationParser
     {
-        float Parse(string equation);
+        bool TryParse(string equation, out List<EquationToken> tokens);
     }
 }

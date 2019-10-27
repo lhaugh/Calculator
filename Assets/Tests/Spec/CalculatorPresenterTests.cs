@@ -8,16 +8,17 @@ namespace Calculator.View.Tests
         private CalculatorPresenter presenter;
 
         private MockCalculatorView mockView;
+        private MockEquationEvaluator mockEquationEvaluator;
 
         [SetUp]
         public void Initialize()
         {
             this.mockView = new MockCalculatorView();
-            var mockEquationParser = new MockEquationParser();
+            this.mockEquationEvaluator = new MockEquationEvaluator();
 
             this.presenter = new CalculatorPresenter(
                 this.mockView,
-                mockEquationParser
+                this.mockEquationEvaluator
             );
         }
 
@@ -41,13 +42,25 @@ namespace Calculator.View.Tests
         }
 
         [Test]
-        public void AppendsDisplay_WhenExistingEntryIsThere()
+        public void AppendsDisplay_WhenNumberPressed_AndExistingEntryIsThere()
         {
             this.mockView.displayContents = "3.14";
             
             this.mockView.RaiseNumberPressed(1);
 
             Assert.That(this.mockView.displayContents, Is.EqualTo("3.141"));
+        }
+
+        [Test]
+        public void Clears_WhenNumberPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
+            this.mockView.RaiseNumberPressed(1);
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("1"));
         }
 
         #endregion
@@ -57,6 +70,28 @@ namespace Calculator.View.Tests
         [Test]
         public void UpdatesDisplay_WhenDecimalPressed()
         {
+            this.mockView.RaiseDecimalPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("."));
+        }
+
+        [Test]
+        public void AppendsDisplay_WhenDecimalPressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseDecimalPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314."));
+        }
+
+        [Test]
+        public void Clears_WhenDecimalPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
             this.mockView.RaiseDecimalPressed();
 
             Assert.That(this.mockView.displayContents, Is.EqualTo("."));
@@ -74,6 +109,28 @@ namespace Calculator.View.Tests
             Assert.That(this.mockView.displayContents, Is.EqualTo("*"));
         }
 
+        [Test]
+        public void AppendsDisplay_WhenMultiplyPressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseMultiplyPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314*"));
+        }
+
+        [Test]
+        public void Clears_WhenMultiplyPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
+            this.mockView.RaiseMultiplyPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("*"));
+        }
+
         #endregion
 
         #region DividePressed
@@ -81,6 +138,28 @@ namespace Calculator.View.Tests
         [Test]
         public void UpdatesDisplay_WhenDividePressed()
         {
+            this.mockView.RaiseDividePressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("/"));
+        }
+
+        [Test]
+        public void AppendsDisplay_WhenDividePressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseDividePressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314/"));
+        }
+
+        [Test]
+        public void Clears_WhenDividePressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
             this.mockView.RaiseDividePressed();
 
             Assert.That(this.mockView.displayContents, Is.EqualTo("/"));
@@ -98,6 +177,28 @@ namespace Calculator.View.Tests
             Assert.That(this.mockView.displayContents, Is.EqualTo("+"));
         }
 
+        [Test]
+        public void AppendsDisplay_WhenAddPressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseAddPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314+"));
+        }
+
+        [Test]
+        public void Clears_WhenAddPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
+            this.mockView.RaiseAddPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("+"));
+        }
+
         #endregion
 
         #region SubtractPressed
@@ -105,6 +206,28 @@ namespace Calculator.View.Tests
         [Test]
         public void UpdatesDisplay_WhenSubtractPressed()
         {
+            this.mockView.RaiseSubtractPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("-"));
+        }
+
+        [Test]
+        public void AppendsDisplay_WhenSubtractPressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseSubtractPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314-"));
+        }
+
+        [Test]
+        public void Clears_WhenSubtractPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
             this.mockView.RaiseSubtractPressed();
 
             Assert.That(this.mockView.displayContents, Is.EqualTo("-"));
@@ -122,6 +245,28 @@ namespace Calculator.View.Tests
             Assert.That(this.mockView.displayContents, Is.EqualTo("("));
         }
 
+        [Test]
+        public void AppendsDisplay_WhenOpenBracketPressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseOpenBracketPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314("));
+        }
+
+        [Test]
+        public void Clears_WhenOpenBracketPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = ")";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
+            this.mockView.RaiseOpenBracketPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("("));
+        }
+
         #endregion
 
         #region CloseBracketPressed
@@ -129,6 +274,28 @@ namespace Calculator.View.Tests
         [Test]
         public void UpdatesDisplay_WhenCloseBracketPressed()
         {
+            this.mockView.RaiseCloseBracketPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo(")"));
+        }
+
+        [Test]
+        public void AppendsDisplay_WhenCloseBracketPressed_AndExistingEntryIsThere()
+        {
+            this.mockView.displayContents = "314";
+            
+            this.mockView.RaiseCloseBracketPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("314)"));
+        }
+
+        [Test]
+        public void Clears_WhenCloseBracketPressed_AndPreviouslyInvalid()
+        {
+            this.mockView.displayContents = "+++";
+            this.mockEquationEvaluator.BadEquation = true;
+            this.mockView.RaiseEqualPressed();
+
             this.mockView.RaiseCloseBracketPressed();
 
             Assert.That(this.mockView.displayContents, Is.EqualTo(")"));
@@ -158,6 +325,16 @@ namespace Calculator.View.Tests
             this.mockView.RaiseEqualPressed();
 
             Assert.That(this.mockView.displayContents, Is.EqualTo("99999"));
+        }
+
+        [Test]
+        public void DisplaysInvalid_WhenEvaluatorThrows()
+        {
+            this.mockEquationEvaluator.BadEquation = true;
+
+            this.mockView.RaiseEqualPressed();
+
+            Assert.That(this.mockView.displayContents, Is.EqualTo("Invalid"));
         }
 
         #endregion

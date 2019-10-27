@@ -3,76 +3,123 @@
     public class CalculatorPresenter
     {
         private ICalculatorView calculatorView;
-        private IEquationParser equationParser;
+        private IEquationEvaluator equationParser;
+
+        private bool invalidEquation = false;
 
         public CalculatorPresenter(
             ICalculatorView calculatorView,
-            IEquationParser equationParser
+            IEquationEvaluator equationParser
         )
         {
             this.calculatorView = calculatorView;
             this.equationParser = equationParser;
 
-            this.calculatorView.NumberPressed += this.NumberPressed;
-            this.calculatorView.DecimalPressed += this.DecimalPointPressed;
-            this.calculatorView.MulitplyPressed += this.MulitplyPressed;
-            this.calculatorView.DividePressed += this.DividePressed;
-            this.calculatorView.AddPressed += this.AddPressed;
-            this.calculatorView.SubtractPressed += this.SubtractPressed;
-            this.calculatorView.EqualsPressed += this.EqualsPressed;
-            this.calculatorView.ClearPressed += this.ClearPressed;
-            this.calculatorView.OpenBracketPressed += this.OpenBracketPressed;
-            this.calculatorView.CloseBracketPressed += this.CloseBracketPressed;
+            this.calculatorView.NumberPressed += this.OnNumberPressed;
+            this.calculatorView.DecimalPressed += this.OnDecimalPointPressed;
+            this.calculatorView.MulitplyPressed += this.OnMulitplyPressed;
+            this.calculatorView.DividePressed += this.OnDividePressed;
+            this.calculatorView.AddPressed += this.OnAddPressed;
+            this.calculatorView.SubtractPressed += this.OnSubtractPressed;
+            this.calculatorView.EqualsPressed += this.OnEqualsPressed;
+            this.calculatorView.ClearPressed += this.OnClearPressed;
+            this.calculatorView.OpenBracketPressed += this.OnOpenBracketPressed;
+            this.calculatorView.CloseBracketPressed += this.OnCloseBracketPressed;
         }
 
-        private void NumberPressed(int number)
+        private void OnNumberPressed(int number)
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += "" + number;
         }
 
-        private void DecimalPointPressed()
+        private void OnDecimalPointPressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += ".";
         }
 
-        private void MulitplyPressed()
+        private void OnMulitplyPressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += "*";
         }
 
-        private void DividePressed()
+        private void OnDividePressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += "/";
         }
 
-        private void AddPressed()
+        private void OnAddPressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += "+";
         }
 
-        private void SubtractPressed()
+        private void OnSubtractPressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += "-";
         }
 
-        private void OpenBracketPressed()
+        private void OnOpenBracketPressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += "(";
         }
 
-        private void CloseBracketPressed()
+        private void OnCloseBracketPressed()
         {
+            if (this.invalidEquation) {
+                this.ClearDisplay();
+            }
+            
             this.calculatorView.DisplayContents += ")";
         }
 
-        private void EqualsPressed()
+        private void OnEqualsPressed()
         {
-            this.calculatorView.DisplayContents = "" + this.equationParser.Parse(this.calculatorView.DisplayContents);
+            float answer;
+            if (this.equationParser.TryEvaluate(this.calculatorView.DisplayContents, out answer)) {
+                this.calculatorView.DisplayContents = "" + answer;
+            }
+            else {
+                this.calculatorView.DisplayContents = "Invalid";
+                this.invalidEquation = true;
+            }
         }
 
-        private void ClearPressed()
+        private void OnClearPressed()
+        {
+            this.ClearDisplay();
+        }
+
+        private void ClearDisplay()
         {
             this.calculatorView.DisplayContents = "";
+            this.invalidEquation = false;
         }
     }
 }
