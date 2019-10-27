@@ -7,7 +7,7 @@ namespace Calculator.View.Tests
         public string DisplayContents
         { 
             get { return this.displayContents; } 
-            set { this.displayContents = value;} 
+            set { this.displayContents = value; } 
         }
 
         public event Action<int> NumberPressed;

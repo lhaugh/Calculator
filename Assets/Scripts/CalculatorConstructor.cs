@@ -12,8 +12,7 @@ namespace Calculator
         private CalculatorPresenter calculatorPresenter;
 
         void Start()
-        {   
-
+        {
             var equationParser = new EquationParser();
             var equationEvaluator = new EquationEvaluator(equationParser);
             this.calculatorPresenter = new CalculatorPresenter(

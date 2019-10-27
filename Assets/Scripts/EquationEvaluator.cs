@@ -32,12 +32,6 @@ namespace Calculator
 
         private bool EvaluateTokens(List<EquationToken> tokens, out float answer)
         {
-            UnityEngine.Debug.Log("~~~~~");
-            foreach (var token in tokens) {
-                UnityEngine.Debug.Log("Token " + token.Type + token.Value);
-            }
-
-
             if (tokens.Count == 0) {
                 answer = 0;
                 return false;
@@ -80,25 +74,7 @@ namespace Calculator
                     }
 
                     if (bracketDepth < 0) {
-                        int bracketLength = i - index;
-                        var bracketContents = tokens.GetRange(index + 1, bracketLength - 1);
-
-                        float bracketValue;
-                        if (!this.EvaluateTokens(bracketContents, out bracketValue)) {
-                            answer = 0;
-                            return false;
-                        }
-
-                        var leftHandSideTokens = tokens.GetRange(0, index);
-                        var rightHandSideTokens = tokens.GetRange(i + 1, tokens.Count - i - 1);
-
-                        tokens.RemoveRange(index, bracketLength + 1);
-                        tokens.Insert(index, new EquationToken() {
-                            Type = EquationToken.TokenType.Value,
-                            Value = bracketValue,
-                        });
-
-                        return this.EvaluateTokens(tokens, out answer);
+                        return this.ExtractBrackets(i, index, tokens, out answer);
                     }
                 }
             }
@@ -113,10 +89,6 @@ namespace Calculator
                 answer = 0;
                 return false;
             }
-
-            UnityEngine.Debug.Log("LHS " + leftHandSide);
-            UnityEngine.Debug.Log("RHS " + leftHandSide);
-            UnityEngine.Debug.Log("OPP " + highestOperator);
 
             switch (highestOperator)
             {
@@ -140,6 +112,29 @@ namespace Calculator
                 answer = 0;
                 return false;
             }
+        }
+
+        private bool ExtractBrackets(int bracketPosition, int index, List<EquationToken> tokens, out float answer)
+        {
+            int bracketLength = bracketPosition - index;
+            var bracketContents = tokens.GetRange(index + 1, bracketLength - 1);
+
+            float bracketValue;
+            if (!this.EvaluateTokens(bracketContents, out bracketValue)) {
+                answer = 0;
+                return false;
+            }
+
+            var leftHandSideTokens = tokens.GetRange(0, index);
+            var rightHandSideTokens = tokens.GetRange(bracketPosition + 1, tokens.Count - bracketPosition - 1);
+
+            tokens.RemoveRange(index, bracketLength + 1);
+            tokens.Insert(index, new EquationToken() {
+                Type = EquationToken.TokenType.Value,
+                Value = bracketValue,
+            });
+
+            return this.EvaluateTokens(tokens, out answer);
         }
     }
 }

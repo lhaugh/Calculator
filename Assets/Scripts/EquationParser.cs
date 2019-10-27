@@ -12,14 +12,7 @@ namespace Calculator
             bool carryNegative = false;
 
             for (int i = 0; i < equation.Length; i++) {
-
                 if (equation[i] == '(') {
-
-                    // tokens.Add(new EquationToken() {
-                    //     Type = EquationToken.TokenType.OpenBracket
-                    // });
-                    // lastToken = i + 1;
-
                     this.CreateTokens(ref equation, lastToken, i, EquationToken.TokenType.OpenBracket, ref tokens, addNegative: carryNegative);
                     lastToken = i + 1;     
                     carryNegative = false;
@@ -93,7 +86,7 @@ namespace Calculator
             if (addNegative) {
                 previousTokenLength -= 1;
             }
-            
+
             bool didParse = false;
             if (previousTokenLength != 0) {
                 EquationToken token;
